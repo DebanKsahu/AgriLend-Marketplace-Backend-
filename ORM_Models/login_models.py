@@ -54,3 +54,10 @@ class LoanSharkInDB(LoanSharkBase,table=True):
     portfolioValue: float = 0.0
     operatingExpenses: float = 0.0
     totalIncome: float = 0.0
+
+class LoanSharkDashboard(SQLModel):
+    name: str
+    loansharkLogo: str
+    aadharCard: str
+    totalCapital: float
+    applicationsApproved: int

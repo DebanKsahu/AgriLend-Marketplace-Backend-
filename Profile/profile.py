@@ -64,7 +64,7 @@ def loanshark_profile(token : Annotated[str,Depends(oauth2Scheme)],session: Sess
     return user_profile
 
 @profile_router.patch("/api/farmer/profile/edit/{digitalId}", response_model=FarmerProfile)
-def edit_farmer_profile(digitalId: str, farmer_profile_update: FarmerProductivityRecordUpdate, session: Session = Depends(get_session)):
+def edit_farmer_profile(digitalId: str, farmer_profile_update: FarmerProductivityRecordUpdate, token : Annotated[str,Depends(oauth2Scheme)], session: Session = Depends(get_session)):
     farmer = session.get(FarmerInDB,digitalId)
     if not farmer:
         raise user_not_found_exception
@@ -93,3 +93,12 @@ def edit_farmer_profile(digitalId: str, farmer_profile_update: FarmerProductivit
     profile_data = farmer.model_dump(exclude={"hashed_password", "aadharCard", "dob", "bankAccount"})
     profile_data["productivityRecords"] = productivity_records
     return FarmerProfile(**profile_data)
+
+@profile_router.get("/api/lenders")
+def fetch_all_lenders(token : Annotated[str,Depends(oauth2Scheme)], session: Session = Depends(get_session)):
+    statement = select(LoanSharkInDB)
+    all_profiles = session.exec(statement).all()
+    post_processed_data = []
+    for profile in all_profiles:
+        post_processed_data.append(LoanSharkDashboard(**profile.model_dump()))
+    return post_processed_data
